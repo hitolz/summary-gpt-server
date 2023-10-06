@@ -43,7 +43,7 @@ function summary_gpt() {
 
   const aiExplanationDiv = document.createElement('div');
   aiExplanationDiv.className = 'summary-gpt-explanation';
-  aiDiv.appendChild(aiExplanationDiv); // 将 tianliGPT-explanation 插入到 aiDiv，而不是 aiTitleDiv
+  aiDiv.appendChild(aiExplanationDiv); 
 
 
   article_div.insertBefore(aiDiv, article_div.firstChild);
