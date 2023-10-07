@@ -35,6 +35,6 @@ GET /summaryFromUrlSync
 ## Docker 部署
 `docker build -t summary-gpt-server .`
 
-`docker run -d -p 5000:5000 summary-gpt-server`
+`docker run -d -p 5000:5000 --name summary-gpt-server summary-gpt-server`
 
 

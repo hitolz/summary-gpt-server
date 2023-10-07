@@ -12,7 +12,7 @@ function removeTrailingSpace(str) {
 
 
 function summary_gpt() {
-  console.log("summary start2...");
+  console.log("summary start...");
 
   const article_div = document.querySelector(".article-content");
 
@@ -43,22 +43,20 @@ function summary_gpt() {
 
   const aiExplanationDiv = document.createElement('div');
   aiExplanationDiv.className = 'summary-gpt-explanation';
-  aiDiv.appendChild(aiExplanationDiv); 
+  aiDiv.appendChild(aiExplanationDiv); // 将 tianliGPT-explanation 插入到 aiDiv，而不是 aiTitleDiv
 
 
   article_div.insertBefore(aiDiv, article_div.firstChild);
 
   const element = document.querySelector(".summary-gpt-explanation");
 
-  const apiUrl = `https://localhost:5000/summaryFromUrl?url=${encodeURIComponent(url)}&content_div_class=article-content`;
+  const apiUrl = `https://ai-summary.hitol.top/summaryFromUrl?url=${encodeURIComponent(url)}&content_div_class=article-content`;
   const eventSource = new EventSource(apiUrl);
 
   
   eventSource.onmessage = function (event) {
     const data = removeTrailingSpace(event.data);
-
     // 处理接收到的数据
-    console.log(data);
     element.innerHTML += data
   };
 
@@ -72,4 +70,3 @@ function summary_gpt() {
 $(function () {
   summary_gpt()
 });
-

@@ -91,3 +91,4 @@ def summary_stream(user_input):
         collected_messages.append(chunk_message)
         if len(chunk_message) > 0:
             yield f"data: {chunk_message['content']} \n\n"
+            

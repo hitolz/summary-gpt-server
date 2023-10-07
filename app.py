@@ -11,7 +11,7 @@ CORS(app)
 
 @app.route('/')
 def index():
-    return "hello my friends"
+    return render_template("article.html")
 
 
 
@@ -23,22 +23,18 @@ def stream_data():
 @app.route('/summaryFromContent')
 def summaryFromContent():
     content = request.args.get('content')
-    def summary_stream():
+    return Response(summary_stream(content), mimetype='text/event-stream')
+
+def summary_stream(content):
         for response in api.summary_stream(content):
             yield response
-    return Response(summary_stream(), mimetype='text/event-stream')
-
 
 @app.route('/summaryFromUrl')
 def summaryFromUrl():
     url = request.args.get('url')
     content_class = request.args.get('content_div_class')
     content = scrape_article(url,content_class)
-
-    def summary_stream():
-        for response in api.summary_stream(content):
-            yield response
-    return Response(summary_stream(), mimetype='text/event-stream')
+    return Response(summary_stream(content), mimetype='text/event-stream')
 
 @app.route('/summaryFromUrlSync')
 def summaryFromUrlSync():
