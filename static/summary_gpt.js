@@ -14,7 +14,7 @@ function removeTrailingSpace(str) {
 function summary_gpt() {
   console.log("summary start...");
 
-  const article_div = document.querySelector(".article-content");
+  const article_div = document.querySelector(summary_gpt_article_content_selector);
 
   // 创建要插入的HTML元素
   const aiDiv = document.createElement('div');
@@ -50,7 +50,7 @@ function summary_gpt() {
 
   const element = document.querySelector(".summary-gpt-explanation");
 
-  const apiUrl = `https://ai-summary.hitol.top/summaryFromUrl?url=${encodeURIComponent(url)}&content_div_class=article-content`;
+  const apiUrl = `${summary_gpt_domain}/summaryFromUrl?url=${encodeURIComponent(url)}&key=${encodeURIComponent(summary_gpt_key)}&content_div_class=article-content`;
   const eventSource = new EventSource(apiUrl);
 
   
