@@ -6,3 +6,6 @@ beautifulsoup4
 flask_cors
 openai
 blueprint
+flask_sqlalchemy
+flask_login
+Werkzeug==2.3.0
