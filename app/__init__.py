@@ -1,16 +1,16 @@
 from flask import Flask
 
-from app import config
+from app.config import config
 from app.api import config_blueprint
 from app.extension import config_extensions
 
-from manage import config_name
+from flask_cors import CORS
 
 
-def creat_app(DevelopmentConfig):
+def creat_app(config_name):
     app = Flask(__name__)
-    app.config.from_object(config.get(config_name))
-    config_extensions(app)
+    CORS(app)
+    # app.config.from_object(config.get(config_name))
+    # config_extensions(app)
     config_blueprint(app)
     return app
-

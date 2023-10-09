@@ -15,12 +15,12 @@ static_pattern = r"\.(css|js)$"
 
 @app.route('/')
 def index():
-    return render_template("article.html")
+    return render_template("app/templates/article.html")
 
 
 @app.route('/test')
 def stream_data():
-    return render_template("index.html")
+    return render_template("app/templates/index.html")
 
 
 def buildSseResponse(content):
@@ -31,7 +31,7 @@ def buildSseResponse(content):
 def before_request():
     ip,url =  get_ip_and_url()
     if re.search(static_pattern,url):
-        return 
+        return
     if request.url_rule.rule == '/summaryFromUrl':
         key = request.args.get('key')
         if not key:

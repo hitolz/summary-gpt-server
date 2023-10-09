@@ -1,7 +1,7 @@
 from .admin import admin
 
 DEFAULT_BLUEPRINT = [
-    (admin, '/api/admin/'),
+    (admin, '/'),
 ]
 
 

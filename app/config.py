@@ -8,7 +8,7 @@ class Config:
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
 
 class DevelopmentConfig(Config):
-    SQLALCHEMY_DATABASE_URI = 'mysql://root:password@localhost:3306/dev-database'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:12345678@localhost:3306/ai_summary'
 
 class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'mysql://root:password@localhost:3306/test-database'
