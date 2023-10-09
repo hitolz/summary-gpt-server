@@ -8,17 +8,17 @@ import re
 from app.extension import db
 from app.models.user import User
 
-admin = Blueprint('admin', __name__)
+ai_summary = Blueprint('admin', __name__)
 
 static_pattern = r"\.(css|js)$"
 
 
-@admin.route('/')
+@ai_summary.route('/')
 def index():
     return render_template("article.html")
 
 
-@admin.route('/test')
+@ai_summary.route('/test')
 def stream_data():
     return render_template("index.html")
 
@@ -28,7 +28,7 @@ def buildSseResponse(content):
     return Response(msg, mimetype='text/event-stream')
 
 
-@admin.before_request
+@ai_summary.before_request
 def before_request():
     ip, url = get_ip_and_url()
     if re.search(static_pattern, url):
@@ -52,7 +52,7 @@ def get_ip_and_url():
     return ip, url
 
 
-@admin.route('/summaryFromContent')
+@ai_summary.route('/summaryFromContent')
 def summaryFromContent():
     content = request.args.get('content')
     return Response(summary_stream(content), mimetype='text/event-stream')
@@ -63,7 +63,7 @@ def summary_stream(content):
         yield response
 
 
-@admin.route('/summaryFromUrl')
+@ai_summary.route('/summaryFromUrl')
 def summaryFromUrl():
     url = request.args.get('url')
     content_class = request.args.get('content_div_class')
@@ -71,7 +71,7 @@ def summaryFromUrl():
     return Response(summary_stream(content), mimetype='text/event-stream')
 
 
-@admin.route('/summaryFromUrlSync')
+@ai_summary.route('/summaryFromUrlSync')
 def summaryFromUrlSync():
     url = request.args.get('url')
     content_class = request.args.get('content_div_class')

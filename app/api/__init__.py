@@ -1,7 +1,7 @@
-from .admin import admin
+from .ai_summary import ai_summary
 
 DEFAULT_BLUEPRINT = [
-    (admin, '/'),
+    (ai_summary, '/'),
 ]
 
 
