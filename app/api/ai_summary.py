@@ -23,7 +23,7 @@ def stream_data():
     return render_template("index.html")
 
 
-def buildSseResponse(content):
+def build_sse_response(content):
     msg = f"data: {content}\n\n"
     return Response(msg, mimetype='text/event-stream')
 
@@ -37,10 +37,12 @@ def before_request():
         key = request.args.get('key')
         if not key:
             error_message = '参数 key 为空，请升级 js 版本'
-            return buildSseResponse(error_message)
+            return build_sse_response(error_message)
         elif key == '123456':
             error_message = '参数 key 为 123456，请修改为自己的 key。'
-            return buildSseResponse(error_message)
+            return build_sse_response(error_message)
+
+    url = request.args.get('url')
 
     print("before ip:" + ip)
     print("before url:" + url)
@@ -92,6 +94,7 @@ def scrape_article(url, content_class):
         return None
 
 
+@ai_summary.route('/user')
 def user_list():
     users = db.session.execute(db.select(User).order_by(User.account)).scalars()
     return render_template("user/list.html", users=users)
