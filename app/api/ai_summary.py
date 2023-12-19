@@ -1,10 +1,11 @@
-from flask import Blueprint, Response, render_template, request, jsonify
+import logging
+import re
 
-import openai_api as api
 import requests
 from bs4 import BeautifulSoup
+from flask import Blueprint, Response, render_template, request
 
-import re
+import openai_api as api
 from app.extension import db
 from app.models.user import User
 
@@ -13,7 +14,7 @@ ai_summary = Blueprint('admin', __name__)
 static_pattern = r"\.(css|js)$"
 
 
-@ai_summary.route('/')
+@ai_summary.route('/article')
 def index():
     return render_template("article.html")
 
@@ -42,8 +43,8 @@ def before_request():
             error_message = '参数 key 为 123456，请修改为自己的 key。'
             return build_sse_response(error_message)
 
-    print("before ip:" + ip)
-    print("before url:" + url)
+    logging.info("before ip:" + ip)
+    logging.info("before url:" + url)
 
 
 def get_ip_and_url():
@@ -66,6 +67,7 @@ def summary_stream(content):
 @ai_summary.route('/summaryFromUrl')
 def summaryFromUrl():
     url = request.args.get('url')
+    logging.info("url = %s", url)
     content_class = request.args.get('content_div_class')
     content = scrape_article(url, content_class)
     return Response(summary_stream(content), mimetype='text/event-stream')
