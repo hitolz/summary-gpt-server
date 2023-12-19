@@ -42,8 +42,6 @@ def before_request():
             error_message = '参数 key 为 123456，请修改为自己的 key。'
             return build_sse_response(error_message)
 
-    url = request.args.get('url')
-
     print("before ip:" + ip)
     print("before url:" + url)
 

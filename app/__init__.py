@@ -1,16 +1,15 @@
 from flask import Flask
-
-from app.config import config
-from app.api import config_blueprint
-from app.extension import config_extensions
-
 from flask_cors import CORS
 
+from app.api import config_blueprint
+from app.config import Config
+from app.extension import config_extensions
 
-def creat_app(config_name):
+
+def creat_app():
     app = Flask(__name__)
     CORS(app)
-    # app.config.from_object(config.get(config_name))
-    # config_extensions(app)
+    app.config.from_object(Config)
+    config_extensions(app)
     config_blueprint(app)
     return app
