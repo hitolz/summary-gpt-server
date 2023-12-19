@@ -87,7 +87,7 @@ def summaryFromUrl():
     url = request.args.get('url')
     cache = find_cache(url)
     if cache:
-        return Response(cache)
+        return Response(cache, mimetype='text/event-stream')
     content_class = request.args.get('content_div_class')
     content = scrape_article(url, content_class)
     return Response(summary_stream(content, url), mimetype='text/event-stream')
