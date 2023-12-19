@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import openai
-import json
 import os
-from dotenv import load_dotenv
+
+import openai
 import tiktoken
+from dotenv import load_dotenv
 
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -69,7 +69,7 @@ def completions_stream(messages=[], system_prompt=[], input_prompt="", context_i
     }
     response = chatcompletion_stream(messages)
     num_tokens = num_tokens_from_messages(messages)
-    return response,num_tokens
+    return response, num_tokens
 
 
 def chatcompletion_stream(messages):
@@ -89,7 +89,8 @@ def summary(user_input):
 
 def summary_stream(user_input):
     collected_messages = []
-    response,num_tokens = completions_stream(system_prompt=[system_message], input_prompt=f"{delimiter}{user_input}{delimiter}")
+    response, num_tokens = completions_stream(system_prompt=[system_message],
+                                              input_prompt=f"{delimiter}{user_input}{delimiter}")
     print(num_tokens)
     for chunk in response:
         chunk_message = chunk['choices'][0]['delta']  # 提取消息内容

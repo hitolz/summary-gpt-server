@@ -1,4 +1,3 @@
-import logging
 import re
 
 import requests
@@ -6,6 +5,7 @@ from bs4 import BeautifulSoup
 from flask import Blueprint, Response, render_template, request
 
 import openai_api as api
+from app.config import redis_client
 from app.extension import db
 from app.models.user import User
 
@@ -43,8 +43,8 @@ def before_request():
             error_message = '参数 key 为 123456，请修改为自己的 key。'
             return build_sse_response(error_message)
 
-    logging.info("before ip:" + ip)
-    logging.info("before url:" + url)
+    print("before ip:" + ip)
+    print("before url:" + url)
 
 
 def get_ip_and_url():
@@ -56,21 +56,41 @@ def get_ip_and_url():
 @ai_summary.route('/summaryFromContent')
 def summaryFromContent():
     content = request.args.get('content')
-    return Response(summary_stream(content), mimetype='text/event-stream')
+    return Response(summary_stream(content, key=None), mimetype='text/event-stream')
 
 
-def summary_stream(content):
+def summary_stream(content, key):
+    if key:
+        exist = redis_client.set(key, '', nx=True)
+        if exist:
+            redis_client.set(key, '', ex=86400)
+            return
     for response in api.summary_stream(content):
+        print(response)
+        if key:
+            redis_client.append(key, response)
         yield response
+
+
+def find_cache(url):
+    print("url = " + url)
+    # cache = ArticleCache.query.filter(ArticleCache.url == url).order_by(desc("id")).first()
+    cache = redis_client.get(url)
+    if cache:
+        print("cache " + cache)
+        return cache
+    return None
 
 
 @ai_summary.route('/summaryFromUrl')
 def summaryFromUrl():
     url = request.args.get('url')
-    logging.info("url = %s", url)
+    cache = find_cache(url)
+    if cache:
+        return Response(cache)
     content_class = request.args.get('content_div_class')
     content = scrape_article(url, content_class)
-    return Response(summary_stream(content), mimetype='text/event-stream')
+    return Response(summary_stream(content, url), mimetype='text/event-stream')
 
 
 @ai_summary.route('/summaryFromUrlSync')
