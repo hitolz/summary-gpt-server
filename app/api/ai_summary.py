@@ -3,10 +3,12 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from flask import Blueprint, Response, render_template, request
+from sqlalchemy import desc
 
-import openai_api as api
-from app.config import redis_client, SUMMARY_PROGRESS_KEY
+from app import openai_api as api
+from app.config import redis_client
 from app.extension import db
+from app.models.article_cache import ArticleCache
 from app.models.user import User
 
 ai_summary = Blueprint('admin', __name__)
@@ -53,38 +55,33 @@ def get_ip_and_url():
     return ip, url
 
 
-@ai_summary.route('/summaryFromContent')
-def summaryFromContent():
-    content = request.args.get('content')
-    return Response(summary_stream(content, key=None), mimetype='text/event-stream')
-
-
 def summary_stream(content, key):
-    if key:
-        not_exist = redis_client.set(key, '', nx=True)
-        if not_exist:
-            redis_client.set(key, '', ex=86400)
-            redis_client.hset(SUMMARY_PROGRESS_KEY, key, "DOING")
-        else:
-            status = redis_client.hget(SUMMARY_PROGRESS_KEY, key)
-            if status == "DOING":
-                return
+    not_exist = redis_client.set(key, '', nx=True)
+    if not_exist:
+        redis_client.set(key, '', ex=300)
 
     for response in api.summary_stream(content, key):
         print(response)
-        if key:
-            redis_client.append(key, response)
+        redis_client.append(key, response)
         yield response
+
+    cache_content = redis_client.get(key)
+    cache = ArticleCache(
+        url=key,
+        summary_content=cache_content
+    )
+    cache.save()
 
 
 def find_cache(url):
     print("url = " + url)
-    # cache = ArticleCache.query.filter(ArticleCache.url == url).order_by(desc("id")).first()
-    cache = redis_client.get(url)
-    status = redis_client.hget(SUMMARY_PROGRESS_KEY, url)
-    if cache and status == "DONE":
-        print("cache " + cache)
-        return cache
+    cache = ArticleCache.query.filter(ArticleCache.url == url).order_by(desc("id")).first()
+    if cache:
+        return cache.summary_content
+    # cache = redis_client.get(url)
+    # if cache:
+    #     print("cache " + cache)
+    #     return cache
     return None
 
 
