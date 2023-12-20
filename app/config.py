@@ -13,6 +13,8 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 pool = redis.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 redis_client = redis.Redis(connection_pool=pool)
 
+SUMMARY_PROGRESS_KEY = "summary_progress"
+
 class Config:
     SECRET_KEY = os.environ.get('KEY') or '123456'
     SQLALCHEMY_TRACK_MODIFICATIONS = False

@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from flask import Blueprint, Response, render_template, request
 
 import openai_api as api
-from app.config import redis_client
+from app.config import redis_client, SUMMARY_PROGRESS_KEY
 from app.extension import db
 from app.models.user import User
 
@@ -61,11 +61,16 @@ def summaryFromContent():
 
 def summary_stream(content, key):
     if key:
-        exist = redis_client.set(key, '', nx=True)
-        if exist:
+        not_exist = redis_client.set(key, '', nx=True)
+        if not_exist:
             redis_client.set(key, '', ex=86400)
-            return
-    for response in api.summary_stream(content):
+            redis_client.hset(SUMMARY_PROGRESS_KEY, key, "DOING")
+        else:
+            status = redis_client.hget(SUMMARY_PROGRESS_KEY, key)
+            if status == "DOING":
+                return
+
+    for response in api.summary_stream(content, key):
         print(response)
         if key:
             redis_client.append(key, response)
@@ -76,7 +81,8 @@ def find_cache(url):
     print("url = " + url)
     # cache = ArticleCache.query.filter(ArticleCache.url == url).order_by(desc("id")).first()
     cache = redis_client.get(url)
-    if cache:
+    status = redis_client.hget(SUMMARY_PROGRESS_KEY, url)
+    if cache and status == "DONE":
         print("cache " + cache)
         return cache
     return None

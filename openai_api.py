@@ -6,6 +6,8 @@ import openai
 import tiktoken
 from dotenv import load_dotenv
 
+from app.config import redis_client, SUMMARY_PROGRESS_KEY
+
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
@@ -87,7 +89,7 @@ def summary(user_input):
     return result['choices'][0]['message']['content']
 
 
-def summary_stream(user_input):
+def summary_stream(user_input, key):
     collected_messages = []
     response, num_tokens = completions_stream(system_prompt=[system_message],
                                               input_prompt=f"{delimiter}{user_input}{delimiter}")
@@ -97,6 +99,8 @@ def summary_stream(user_input):
         collected_messages.append(chunk_message)
         if len(chunk_message) > 0:
             yield f"data: {chunk_message['content']} \n\n"
+
+    redis_client.hset(SUMMARY_PROGRESS_KEY, key, "DONE")
 
 
 def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613"):
