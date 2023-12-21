@@ -1,6 +1,15 @@
 AI文章摘要生成器 server 端
 
-使用的时候需要在项目根目录下创建一个 .env 文件，里面只有一个参数 OPENAI_API_KEY
+使用的时候需要在项目根目录下创建一个 .env 文件，里面参数 
+```
+OPENAI_API_KEY
+SQLALCHEMY_DATABASE_URI = 'mysql://root:123456@localhost:3306/ai_summary'
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
+REDIS_PASSWORD= xxx
+```
+
+
 
 针对 Mweb 生成的博客制作，content_div_class=article-content
 
