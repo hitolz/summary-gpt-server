@@ -5,7 +5,10 @@ from sqlalchemy import desc
 from app import openai_api
 from app.config import redis_client
 from app.models.article_cache import ArticleCache
+import pytz
 
+# 获取北京时区
+beijing_tz = pytz.timezone('Asia/Shanghai')
 
 def find_cache(url):
     print("url = " + url)
@@ -32,7 +35,7 @@ def summary_stream(content, key, current_app):
             url=key,
             summary_content=cache_content,
             active=1,
-            expire_time=datetime.now() + timedelta(hours=3)
+            expire_time=datetime.now(beijing_tz) + timedelta(hours=3)
         )
         with current_app.app_context():
             cache.save()
