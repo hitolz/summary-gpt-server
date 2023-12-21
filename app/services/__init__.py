@@ -1,14 +1,15 @@
 from datetime import datetime, timedelta
 
+import pytz
 from sqlalchemy import desc
 
 from app import openai_api
 from app.config import redis_client
 from app.models.article_cache import ArticleCache
-import pytz
 
 # 获取北京时区
 beijing_tz = pytz.timezone('Asia/Shanghai')
+
 
 def find_cache(url):
     print("url = " + url)

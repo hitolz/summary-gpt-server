@@ -1,4 +1,5 @@
 import re
+import time
 
 import requests
 from bs4 import BeautifulSoup
@@ -53,12 +54,18 @@ def get_ip_and_url():
     return ip, url
 
 
+def generate(cache):
+    for line in cache.splitlines():
+        yield line + '\n'
+        time.sleep(0.1)  # 添加0.5秒的延迟
+
+
 @ai_summary.route('/summaryFromUrl')
 def summaryFromUrl():
     url = request.args.get('url')
     cache = find_cache(url)
     if cache:
-        return Response(cache, mimetype='text/event-stream')
+        return Response(generate(cache), mimetype='text/event-stream')
     content_class = request.args.get('content_div_class')
     content = scrape_article(url, content_class)
     return Response(summary_stream(content, url, current_app._get_current_object()), mimetype='text/event-stream')
