@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from sqlalchemy import desc
 
 from app import openai_api
@@ -7,7 +9,7 @@ from app.models.article_cache import ArticleCache
 
 def find_cache(url):
     print("url = " + url)
-    cache = ArticleCache.query.filter(ArticleCache.url == url).order_by(desc("id")).first()
+    cache = ArticleCache.query.filter(ArticleCache.url == url, ArticleCache.active == 1).order_by(desc("id")).first()
     if cache:
         return cache.summary_content
     return None
@@ -28,7 +30,9 @@ def summary_stream(content, key, current_app):
         cache_content = redis_client.get(key)
         cache = ArticleCache(
             url=key,
-            summary_content=cache_content
+            summary_content=cache_content,
+            active=1,
+            expire_time=datetime.now() + timedelta(hours=3)
         )
         with current_app.app_context():
             cache.save()
