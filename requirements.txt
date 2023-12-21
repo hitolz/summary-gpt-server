@@ -4,7 +4,7 @@ flask
 requests
 beautifulsoup4
 flask_cors
-openai
+openai==0.28
 blueprint
 flask_sqlalchemy
 flask_login
