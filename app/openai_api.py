@@ -6,10 +6,6 @@ import openai
 import tiktoken
 from dotenv import load_dotenv
 
-from app.config import redis_client, SUMMARY_PROGRESS_KEY
-from app.extension import db
-from app.models.article_cache import ArticleCache
-
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 

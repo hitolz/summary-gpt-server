@@ -1,9 +1,10 @@
 from flask import Flask
 from flask_cors import CORS
 
-from app.api import config_blueprint
+
 from app.config import Config
 from app.extension import config_extensions
+from app.api import config_blueprint
 
 
 def creat_app():

@@ -3,13 +3,11 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from flask import Blueprint, Response, render_template, request
-from sqlalchemy import desc
+from flask import current_app
 
-from app import openai_api as api
-from app.config import redis_client
 from app.extension import db
-from app.models.article_cache import ArticleCache
 from app.models.user import User
+from app.services import find_cache, summary_stream
 
 ai_summary = Blueprint('admin', __name__)
 
@@ -55,36 +53,6 @@ def get_ip_and_url():
     return ip, url
 
 
-def summary_stream(content, key):
-    not_exist = redis_client.set(key, '', nx=True)
-    if not_exist:
-        redis_client.set(key, '', ex=300)
-
-    for response in api.summary_stream(content, key):
-        print(response)
-        redis_client.append(key, response)
-        yield response
-
-    cache_content = redis_client.get(key)
-    cache = ArticleCache(
-        url=key,
-        summary_content=cache_content
-    )
-    cache.save()
-
-
-def find_cache(url):
-    print("url = " + url)
-    cache = ArticleCache.query.filter(ArticleCache.url == url).order_by(desc("id")).first()
-    if cache:
-        return cache.summary_content
-    # cache = redis_client.get(url)
-    # if cache:
-    #     print("cache " + cache)
-    #     return cache
-    return None
-
-
 @ai_summary.route('/summaryFromUrl')
 def summaryFromUrl():
     url = request.args.get('url')
@@ -93,15 +61,7 @@ def summaryFromUrl():
         return Response(cache, mimetype='text/event-stream')
     content_class = request.args.get('content_div_class')
     content = scrape_article(url, content_class)
-    return Response(summary_stream(content, url), mimetype='text/event-stream')
-
-
-@ai_summary.route('/summaryFromUrlSync')
-def summaryFromUrlSync():
-    url = request.args.get('url')
-    content_class = request.args.get('content_div_class')
-    content = scrape_article(url, content_class)
-    return api.summary(content)
+    return Response(summary_stream(content, url, current_app._get_current_object()), mimetype='text/event-stream')
 
 
 def scrape_article(url, content_class):
