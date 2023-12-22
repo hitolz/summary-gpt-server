@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from urllib.parse import urlparse
 
 import pytz
 from sqlalchemy import desc
@@ -6,8 +7,9 @@ from sqlalchemy import desc
 from app import openai_api
 from app.config import redis_client
 from app.models.article_cache import ArticleCache
-
 # 获取北京时区
+from app.models.auth_site import AuthSite
+
 beijing_tz = pytz.timezone('Asia/Shanghai')
 
 
@@ -17,6 +19,12 @@ def find_cache(url):
     if cache:
         return cache.summary_content
     return None
+
+
+def get_domain(url):
+    parsed_uri = urlparse(url)
+    domain = '{uri.netloc}'.format(uri=parsed_uri)
+    return domain
 
 
 def summary_stream(content, key, current_app):
@@ -36,8 +44,17 @@ def summary_stream(content, key, current_app):
             url=key,
             summary_content=cache_content,
             active=1,
-            expire_time=datetime.now(beijing_tz) + timedelta(hours=3)
+            expire_time=get_expire_time(key, current_app)
         )
         with current_app.app_context():
             cache.save()
         redis_client.delete(key)
+
+
+def get_expire_time(key, current_app):
+    domain = get_domain(key)
+    with current_app.app_context():
+        auth_site = AuthSite.query.filter(AuthSite.site_domain == domain, AuthSite.active == 1).first()
+        if auth_site:
+            return datetime.now(beijing_tz) + timedelta(hours=auth_site.expire_hours)
+        return datetime.now(beijing_tz) + timedelta(hours=3)

@@ -22,7 +22,7 @@ def creat_app():
     config_extensions(app)
     config_blueprint(app)
     scheduler = BackgroundScheduler()
-    # scheduler.add_job(func=cache_expire, args=(app,), trigger='interval', seconds=2)
+    # scheduler.add_job(func=cache_expire, args=(app,), trigger='interval', seconds=5)
     scheduler.add_job(func=cache_expire, args=(app,), trigger='cron', minute=0)
     scheduler.start()
     atexit.register(lambda: scheduler.shutdown())
