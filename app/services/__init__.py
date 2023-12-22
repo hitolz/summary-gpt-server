@@ -2,10 +2,11 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
 import pytz
-from sqlalchemy import desc
+from sqlalchemy import desc, text
 
 from app import openai_api
 from app.config import redis_client
+from app.extension import db
 from app.models.article_cache import ArticleCache
 # 获取北京时区
 from app.models.auth_site import AuthSite
@@ -25,6 +26,12 @@ def get_domain(url):
     parsed_uri = urlparse(url)
     domain = '{uri.netloc}'.format(uri=parsed_uri)
     return domain
+
+
+def get_auth_site(key, current_app):
+    sql = text("""select a.* from auth_site a join `user`  b on a.user_id = b.id where b.summary_key = :summary_key""")
+    result = db.session.execute(sql, {'summary_key': key}).fetchall()
+    return result
 
 
 def summary_stream(content, key, current_app):

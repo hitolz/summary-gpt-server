@@ -8,7 +8,7 @@ from flask import current_app
 
 from app.extension import db
 from app.models.user import User
-from app.services import find_cache, summary_stream
+from app.services import find_cache, summary_stream, get_domain, get_auth_site
 
 ai_summary = Blueprint('admin', __name__)
 
@@ -57,12 +57,27 @@ def get_ip_and_url():
 def generate(cache):
     for line in cache.splitlines():
         yield line + '\n'
-        time.sleep(0.1)  # 添加0.5秒的延迟
+        time.sleep(0.05)  # 添加0.05秒的延迟
+
+
+def auth(url, key):
+    domain = get_domain(url)
+    sites = get_auth_site(key, current_app._get_current_object())
+    if not sites:
+        return False
+    for site in sites:
+        if site.site_domain == domain:
+            return True
 
 
 @ai_summary.route('/summaryFromUrl')
 def summaryFromUrl():
     url = request.args.get('url')
+    key = request.args.get('key')
+    if not auth(url, key):
+        error_message = '文章域名校验不通过'
+        return build_sse_response(error_message)
+
     cache = find_cache(url)
     if cache:
         return Response(generate(cache), mimetype='text/event-stream')
