@@ -28,7 +28,7 @@ def get_domain(url):
     return domain
 
 
-def get_auth_site(key, current_app):
+def get_auth_site(key):
     sql = text("""select a.* from auth_site a join `user`  b on a.user_id = b.id where b.summary_key = :summary_key""")
     result = db.session.execute(sql, {'summary_key': key}).fetchall()
     return result

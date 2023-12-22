@@ -62,7 +62,7 @@ def generate(cache):
 
 def auth(url, key):
     domain = get_domain(url)
-    sites = get_auth_site(key, current_app._get_current_object())
+    sites = get_auth_site(key)
     if not sites:
         return False
     for site in sites:
