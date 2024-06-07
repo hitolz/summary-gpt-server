@@ -1,0 +1,51 @@
+version: '3'
+services:
+  mysql_db:
+    image: "mysql"
+    ports:
+      - "3307:3306"
+    volumes:
+#      - /root/mysql:/var/lib/mysql
+      - ./my.cnf:/etc/my.cnf
+      - ./sql.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: ai_summary
+      MYSQL_USER: ai_summary
+      MYSQL_PASSWORD: password
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_general_ci
+
+  redis:
+    image: "redis"
+#    ports:
+#      - "6379:6379"
+    restart: always
+    command: --requirepass password
+    environment:
+      REDIS_PASSWORD: password
+
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    depends_on:
+      - mysql_db
+      - redis
+    environment:
+      - OPENAI_API_KEY=sk-proj-onZRMKbYq3lxxxxxxxxxxxxxx
+      - SQLALCHEMY_DATABASE_URI = "mysql://root:password@mysql_db:3306/ai_summary?charset=utf8mb4"
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=password
+      - FLASK_APP=manage.py
+
+volumes:
+    db_data: {}
+
